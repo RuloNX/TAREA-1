@@ -253,7 +253,10 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
         printf("\nSeleccione una opción: ");
 
         if (scanf("%d", &opcion) != 1) {
+            system(CLEAR);
             printf("Error al leer la entrada. Inténtelo de nuevo.\n");
+            sleep(2);
+            system(CLEAR);
             while (getchar() != '\n');
             continue;
         }
@@ -277,7 +280,10 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
                 system(CLEAR);
                 exit(0);
             default:
+                system(CLEAR);
                 printf("Opción no válida. Por favor, seleccione una opción del 1 al 5.\n");
+                sleep(3);
+                system(CLEAR);
                 break;
         }
     } while (opcion != 5);
