@@ -111,7 +111,7 @@ void registrarPaciente(ListaEspera *lista) {
     if (scanf("%s", nuevo_paciente.nombre) != 1 || !validarNombre(nuevo_paciente.nombre)) {
         system(CLEAR);
         printf("Error: Ingrese un Nombre Valido.\n");
-        sleep(1);
+        sleep(2);
         registrarPaciente(lista);
         return;
     }
@@ -119,7 +119,7 @@ void registrarPaciente(ListaEspera *lista) {
     if (scanf("%s", entrada) != 1) { // Leer como cadena
         system(CLEAR);
         printf("Error: Ingrese una Edad Valida.\n");
-        sleep(1);
+        sleep(2);
         registrarPaciente(lista);
         return;
     }
@@ -127,7 +127,7 @@ void registrarPaciente(ListaEspera *lista) {
     if (strchr(entrada, '.') != NULL) {
         system(CLEAR);
         printf("Error: Ingrese una Edad Valida.\n");
-        sleep(1);
+        sleep(2);
         registrarPaciente(lista);
         return;
     }
@@ -136,7 +136,7 @@ void registrarPaciente(ListaEspera *lista) {
     if (!validarEdad(nuevo_paciente.edad)) {
         system(CLEAR);
         printf("Error: Ingrese una Edad Valida.\n");
-        sleep(1);
+        sleep(2);
         registrarPaciente(lista);
         return;
     }
@@ -147,7 +147,7 @@ void registrarPaciente(ListaEspera *lista) {
     ordenarPorHora(&lista->baja); // Ordenar la lista baja prioridad por hora
     system(CLEAR);
     printf("*** Paciente registrado exitosamente ***\n");
-    sleep(1);
+    sleep(2);
     system(CLEAR);
 }
 
@@ -159,7 +159,10 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
     printf("2. Volver al menú principal\n");
     printf("Seleccione una opción: ");
     if (scanf("%d", &opcion) != 1) {
+        system(CLEAR);
         printf("Error al leer la entrada. Inténtelo de nuevo.\n");
+        sleep(2);
+        system(CLEAR);
         while (getchar() != '\n');
         mostrarPacientesEnEspera(lista);
         return;
@@ -171,7 +174,10 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
             printf("\nIngrese el nombre del paciente a eliminar: ");
             char nombre[MAX_NOMBRE];
             if (scanf("%s", nombre) != 1) {
+                system(CLEAR);
                 printf("Error al leer el nombre del paciente.\n");
+                sleep(2);
+                system(CLEAR);
                 while (getchar() != '\n');
                 return;
             }
@@ -192,7 +198,7 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
                     free(actual);
                     system(CLEAR);
                     printf("*** Paciente eliminado exitosamente ***\n");
-                    sleep(1);
+                    sleep(2);
                     system(CLEAR);
                     mostrarPacientesEnEspera(lista);
                     return;
@@ -200,7 +206,7 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
             }
             system(CLEAR);
             printf("El paciente no se encontró en la lista.\n");
-            sleep(1);
+            sleep(2);
             system(CLEAR);
             mostrarPacientesEnEspera(lista);
             break;
@@ -209,7 +215,10 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
             mostrarMenuPrincipal(lista);
             break;
         default:
+            system(CLEAR);
             printf("Opción no válida. Por favor, seleccione 1 o 2.\n");
+            sleep(2);
+            system(CLEAR);
             mostrarPacientesEnEspera(lista);
             break;
     }
@@ -276,13 +285,13 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
             case 5:
                 system(CLEAR);
                 printf("Saliendo del programa...\n");
-                sleep(1);
+                sleep(2);
                 system(CLEAR);
                 exit(0);
             default:
                 system(CLEAR);
                 printf("Opción no válida. Por favor, seleccione una opción del 1 al 5.\n");
-                sleep(3);
+                sleep(2);
                 system(CLEAR);
                 break;
         }
@@ -297,7 +306,10 @@ void cambiarPrioridadPaciente(ListaEspera *lista) {
     printf("2. Volver al menú principal\n");
     printf("Seleccione una opción: ");
     if (scanf("%d", &opcion) != 1) {
+        system(CLEAR);
         printf("Error al leer la entrada. Inténtelo de nuevo.\n");
+        sleep(2);
+        system(CLEAR);
         while (getchar() != '\n');
         cambiarPrioridadPaciente(lista);
         return;
