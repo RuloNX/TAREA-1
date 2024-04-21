@@ -242,13 +242,16 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
     system(CLEAR);
     int opcion;
     do {
-        printf("Menu Principal\n");
-        printf("1. Registrar nuevo paciente\n");
-        printf("2. Ver lista de pacientes en espera\n");
-        printf("3. Cambiar prioridad de un paciente\n");
-        printf("4. Atender al siguiente paciente\n");
-        printf("5. Salir\n");
-        printf("Seleccione una opción: ");
+        printf("\n ============= Menú Principal ==============\n");
+        printf("|                                            |\n");
+        printf("| 1. Registrar nuevo paciente                |\n");
+        printf("| 2. Ver lista de pacientes en espera        |\n");
+        printf("| 3. Cambiar prioridad de un paciente        |\n");
+        printf("| 4. Atender al siguiente paciente           |\n");
+        printf("| 5. Salir                                   |\n");
+        printf(" ============================================\n");
+        printf("\nSeleccione una opción: ");
+
         if (scanf("%d", &opcion) != 1) {
             printf("Error al leer la entrada. Inténtelo de nuevo.\n");
             while (getchar() != '\n');
