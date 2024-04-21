@@ -49,6 +49,7 @@ void agregarPaciente(ListaPacientes *lista, Paciente paciente);
 void eliminarPaciente(ListaPacientes *lista, const char *nombre);
 void ordenarPorHora(ListaPacientes *lista);
 int buscarPacienteEnLista(ListaPacientes *lista, const char *nombre, Nodo **encontrado, Nodo **anterior);
+void atenderSiguientePaciente(ListaEspera *lista);
 
 int main() {
     ListaEspera lista_espera;
@@ -264,7 +265,7 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
                 cambiarPrioridadPaciente(lista);
                 break;
             case 4:
-                // Lógica para atender al siguiente paciente
+                atenderSiguientePaciente(lista);
                 break;
             case 5:
                 system(CLEAR);
@@ -389,6 +390,47 @@ void cambiarPrioridadPaciente(ListaEspera *lista) {
     }
 }
 
+void atenderSiguientePaciente(ListaEspera *lista) {
+    system(CLEAR);
+    ListaPacientes *listas_prioridad[] = {&lista->alta, &lista->media, &lista->baja};
+    int i = 0;
+    while (i < 3) {
+        if (listas_prioridad[i]->inicio != NULL) {
+            Nodo *atendido = listas_prioridad[i]->inicio;
+            printf("Atendiendo al siguiente paciente:\n\n");
+            printf("Nombre: %s, Edad: %d, Síntoma: %s\n", atendido->paciente.nombre, atendido->paciente.edad, atendido->paciente.sintoma);
+            listas_prioridad[i]->inicio = atendido->siguiente;
+            free(atendido);
+            int opcion;
+            printf("\n1. Atender al siguiente paciente\n");
+            printf("2. Volver al menú principal\n");
+            printf("Seleccione una opción: ");
+            if (scanf("%d", &opcion) != 1) {
+                printf("Error al leer la entrada. Inténtelo de nuevo.\n");
+                while (getchar() != '\n');
+                continue;
+            }
+            switch (opcion) {
+                case 1:
+                    atenderSiguientePaciente(lista);
+                    break;
+                case 2:
+                    mostrarMenuPrincipal(lista);
+                    break;
+                default:
+                    printf("Opción no válida. Por favor, seleccione 1 o 2.\n");
+                    break;
+            }
+            return;
+        }
+        i++;
+    }
+    printf("No hay pacientes en espera.\n");
+    sleep(2);
+    system(CLEAR);
+    mostrarMenuPrincipal(lista);
+}
+
 
 int validarNombre(const char *nombre) {
     while (*nombre) {
@@ -417,4 +459,3 @@ int buscarPacienteEnLista(ListaPacientes *lista, const char *nombre, Nodo **enco
     }
     return 0;
 }
-
