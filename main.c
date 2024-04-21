@@ -42,10 +42,13 @@ void mostrarPacientesEnEspera(ListaEspera *lista);
 void cambiarPrioridadPaciente(ListaEspera *lista);
 void mostrarMenuPrincipal(ListaEspera *lista);
 void mostrarListaEspera(ListaEspera *lista);
-void mostrarLista(ListaPacientes *lista); // Declaración de la función mostrarLista
+void mostrarLista(ListaPacientes *lista);
 int validarNombre(const char *nombre);
 int validarEdad(int edad);
 void agregarPaciente(ListaPacientes *lista, Paciente paciente);
+void eliminarPaciente(ListaPacientes *lista, const char *nombre);
+void ordenarPorHora(ListaPacientes *lista);
+int buscarPacienteEnLista(ListaPacientes *lista, const char *nombre, Nodo **encontrado, Nodo **anterior);
 
 int main() {
     ListaEspera lista_espera;
@@ -73,32 +76,77 @@ void agregarPaciente(ListaPacientes *lista, Paciente paciente) {
     lista->inicio = nuevo_nodo;
 }
 
+void ordenarPorHora(ListaPacientes *lista) {
+    if (lista->inicio == NULL || lista->inicio->siguiente == NULL) {
+        return; // No se necesita ordenar si la lista está vacía o tiene solo un elemento
+    }
+    int swapped;
+    Nodo *ptr1;
+    Nodo *lptr = NULL;
+
+    do {
+        swapped = 0;
+        ptr1 = lista->inicio;
+
+        while (ptr1->siguiente != lptr) {
+            if (ptr1->paciente.hora_registro > ptr1->siguiente->paciente.hora_registro) {
+                // Intercambiar los nodos si están en el orden incorrecto
+                Paciente temp = ptr1->paciente;
+                ptr1->paciente = ptr1->siguiente->paciente;
+                ptr1->siguiente->paciente = temp;
+                swapped = 1;
+            }
+            ptr1 = ptr1->siguiente;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+
 void registrarPaciente(ListaEspera *lista) {
-    system(CLEAR);
     Paciente nuevo_paciente;
+    char entrada[MAX_NOMBRE]; // Para almacenar la entrada del usuario
+    system(CLEAR);
     printf("Ingrese el nombre del paciente: ");
     if (scanf("%s", nuevo_paciente.nombre) != 1 || !validarNombre(nuevo_paciente.nombre)) {
-        printf("Error: El nombre debe contener solo letras.\n");
-        while (getchar() != '\n');
+        system(CLEAR);
+        printf("Error: Ingrese un Nombre Valido.\n");
+        sleep(1);
+        registrarPaciente(lista);
         return;
     }
     printf("Ingrese la edad del paciente: ");
-    if (scanf("%d", &nuevo_paciente.edad) != 1 || !validarEdad(nuevo_paciente.edad)) {
-        printf("Error: La edad debe ser un número de hasta 3 dígitos.\n");
-        while (getchar() != '\n');
+    if (scanf("%s", entrada) != 1) { // Leer como cadena
+        system(CLEAR);
+        printf("Error: Ingrese una Edad Valida.\n");
+        sleep(1);
+        registrarPaciente(lista);
+        return;
+    }
+    // Verificar si la entrada contiene un punto decimal
+    if (strchr(entrada, '.') != NULL) {
+        system(CLEAR);
+        printf("Error: Ingrese una Edad Valida.\n");
+        sleep(1);
+        registrarPaciente(lista);
+        return;
+    }
+    // Convertir la entrada a entero
+    nuevo_paciente.edad = atoi(entrada);
+    if (!validarEdad(nuevo_paciente.edad)) {
+        system(CLEAR);
+        printf("Error: Ingrese una Edad Valida.\n");
+        sleep(1);
+        registrarPaciente(lista);
         return;
     }
     printf("Ingrese el síntoma del paciente: ");
-    if (scanf("%s", nuevo_paciente.sintoma) != 1) {
-        printf("Error al leer el síntoma del paciente.\n");
-        while (getchar() != '\n');
-        return;
-    }
+    scanf(" %99[^\n]", nuevo_paciente.sintoma); // Leer el síntoma sin restricciones
     nuevo_paciente.hora_registro = time(NULL);
     agregarPaciente(&lista->baja, nuevo_paciente);
+    ordenarPorHora(&lista->baja); // Ordenar la lista baja prioridad por hora
     system(CLEAR);
     printf("*** Paciente registrado exitosamente ***\n");
-    sleep(2);
+    sleep(1);
     system(CLEAR);
 }
 
@@ -143,14 +191,15 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
                     free(actual);
                     system(CLEAR);
                     printf("*** Paciente eliminado exitosamente ***\n");
-                    sleep(2);
+                    sleep(1);
                     system(CLEAR);
                     mostrarPacientesEnEspera(lista);
                     return;
                 }
             }
+            system(CLEAR);
             printf("El paciente no se encontró en la lista.\n");
-            sleep(2);
+            sleep(1);
             system(CLEAR);
             mostrarPacientesEnEspera(lista);
             break;
@@ -168,15 +217,19 @@ void mostrarPacientesEnEspera(ListaEspera *lista) {
 void mostrarListaEspera(ListaEspera *lista) {
     system(CLEAR);
     printf("Lista de pacientes en espera:\n\n");
-    printf("--- Alta prioridad ---\n");
+    printf("==== Alta prioridad ====\n");
     mostrarLista(&lista->alta);
-    printf("\n--- Media prioridad ---\n");
+    printf("\n==== Media prioridad ====\n");
     mostrarLista(&lista->media);
-    printf("\n--- Baja prioridad ---\n");
+    printf("\n==== Baja prioridad ====\n");
     mostrarLista(&lista->baja);
 }
 
 void mostrarLista(ListaPacientes *lista) {
+    if (lista->inicio == NULL) {
+        printf("*** Lista vacía ***\n");
+        return;
+    }
     Nodo *actual = lista->inicio;
     while (actual != NULL) {
         printf("Nombre: %s, Edad: %d, Síntoma: %s\n", actual->paciente.nombre, actual->paciente.edad, actual->paciente.sintoma);
@@ -218,7 +271,7 @@ void mostrarMenuPrincipal(ListaEspera *lista) {
                 printf("Saliendo del programa...\n");
                 sleep(1);
                 system(CLEAR);
-                return;
+                exit(0);
             default:
                 printf("Opción no válida. Por favor, seleccione una opción del 1 al 5.\n");
                 break;
@@ -246,8 +299,12 @@ void cambiarPrioridadPaciente(ListaEspera *lista) {
             printf("\nIngrese el nombre del paciente: ");
             char nombre[MAX_NOMBRE];
             if (scanf("%s", nombre) != 1) {
+                system(CLEAR);
                 printf("Error al leer el nombre del paciente.\n");
                 while (getchar() != '\n');
+                sleep(2);
+                system(CLEAR);
+                cambiarPrioridadPaciente(lista);
                 return;
             }
             printf("Ingrese la nueva prioridad (a - alta, m - media, b - baja): ");
@@ -261,92 +318,63 @@ void cambiarPrioridadPaciente(ListaEspera *lista) {
                 cambiarPrioridadPaciente(lista);
                 return;
             }
+
             ListaPacientes *lista_origen = NULL;
+            ListaPacientes *lista_destino = NULL;
+
             switch (prioridad) {
                 case 'a':
-                    lista_origen = &lista->alta;
+                    lista_destino = &lista->alta;
                     break;
                 case 'm':
-                    lista_origen = &lista->media;
+                    lista_destino = &lista->media;
                     break;
                 case 'b':
-                    lista_origen = &lista->baja;
+                    lista_destino = &lista->baja;
                     break;
-                default:
-                    printf("Error: Prioridad no válida.\n");
-                    return;
             }
-            Nodo *actual;
+
+            Nodo *actual = NULL;
             Nodo *anterior = NULL;
-            // Buscar al paciente en todas las listas
-            for (int i = 0; i < 3; ++i) {
-                actual = NULL;
-                switch (i) {
-                    case 0:
-                        actual = lista->alta.inicio;
-                        break;
-                    case 1:
-                        actual = lista->media.inicio;
-                        break;
-                    case 2:
-                        actual = lista->baja.inicio;
-                        break;
-                }
-                while (actual != NULL && strcmp(actual->paciente.nombre, nombre) != 0) {
-                    anterior = actual;
-                    switch (i) {
-                        case 0:
-                            actual = actual->siguiente;
-                            break;
-                        case 1:
-                            actual = actual->siguiente;
-                            break;
-                        case 2:
-                            actual = actual->siguiente;
-                            break;
-                    }
-                }
-                if (actual != NULL) {
-                    if (anterior != NULL) {
-                        anterior->siguiente = actual->siguiente;
-                    } else {
-                        switch (i) {
-                            case 0:
-                                lista->alta.inicio = actual->siguiente;
-                                break;
-                            case 1:
-                                lista->media.inicio = actual->siguiente;
-                                break;
-                            case 2:
-                                lista->baja.inicio = actual->siguiente;
-                                break;
-                        }
-                    }
-                    switch (prioridad) {
-                        case 'a':
-                            actual->siguiente = lista->alta.inicio;
-                            lista->alta.inicio = actual;
-                            break;
-                        case 'm':
-                            actual->siguiente = lista->media.inicio;
-                            lista->media.inicio = actual;
-                            break;
-                        case 'b':
-                            actual->siguiente = lista->baja.inicio;
-                            lista->baja.inicio = actual;
-                            break;
-                    }
-                    system(CLEAR);
-                    printf("*** Cambio de prioridad exitoso ***\n");
-                    sleep(2);
-                    cambiarPrioridadPaciente(lista);
+
+            // Buscar al paciente en todas las listas de prioridad
+            ListaPacientes *todas_listas[] = {&lista->alta, &lista->media, &lista->baja};
+            for (int i = 0; i < 3; i++) {
+                if (buscarPacienteEnLista(todas_listas[i], nombre, &actual, &anterior)) {
+                    lista_origen = todas_listas[i];
+                    break;
                 }
             }
+
+            if (lista_origen == NULL) {
+                system(CLEAR);
+                printf("Error: El paciente no se encontró en ninguna lista.\n");
+                sleep(2);
+                system(CLEAR);
+                cambiarPrioridadPaciente(lista);
+                return;
+            }
+
+            // Remover al paciente de la lista de origen
+            if (anterior != NULL) {
+                anterior->siguiente = actual->siguiente;
+            } else {
+                lista_origen->inicio = actual->siguiente;
+            }
+
+            // Agregar al paciente a la nueva lista de prioridad
+            agregarPaciente(lista_destino, actual->paciente);
+            free(actual);
+
+            // Ordenar la nueva lista por hora de llegada
+            ordenarPorHora(lista_destino);
+
             system(CLEAR);
-            printf("Error: El paciente no se encontró en la lista.\n");
+            printf("*** Cambio de prioridad exitoso ***\n");
             sleep(2);
             system(CLEAR);
-            break;
+            cambiarPrioridadPaciente(lista);
+            return;
         }
         case 2:
             mostrarMenuPrincipal(lista);
@@ -373,5 +401,20 @@ int validarNombre(const char *nombre) {
 }
 
 int validarEdad(int edad) {
-    return (edad >= 0 && edad <= 999);
+    return (edad > 0 && edad <= 179);
 }
+
+int buscarPacienteEnLista(ListaPacientes *lista, const char *nombre, Nodo **encontrado, Nodo **anterior) {
+    Nodo *actual = lista->inicio;
+    *anterior = NULL;
+    while (actual != NULL && strcmp(actual->paciente.nombre, nombre) != 0) {
+        *anterior = actual;
+        actual = actual->siguiente;
+    }
+    if (actual != NULL) {
+        *encontrado = actual;
+        return 1;
+    }
+    return 0;
+}
+
